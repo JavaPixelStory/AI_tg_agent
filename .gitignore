@@ -1,0 +1,28 @@
+# Secrets and Telegram user sessions
+.env
+.env.*
+!.env.example
+sources.yaml
+*.session
+*.session-journal
+
+# Runtime state and logs
+data/
+logs/
+*.sqlite3
+*.db
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
