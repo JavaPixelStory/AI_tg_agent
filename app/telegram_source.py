@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import suppress
-from io import BytesIO
 
 from telethon import TelegramClient, events
 
@@ -11,11 +10,11 @@ from .models import NewsItem
 
 
 async def watch_channels(settings: Settings, on_item) -> None:
-    """Watch configured public channels through the owner's Telegram account."""
+    """Наблюдает за настроенными публичными каналами через аккаунт владельца."""
     if not settings.telegram_channels:
         return
     if not (settings.tg_api_id and settings.tg_api_hash and settings.tg_phone):
-        raise RuntimeError("Telegram channels need TG_API_ID, TG_API_HASH and TG_PHONE in .env.")
+        raise RuntimeError("Для Telegram-каналов укажите в .env TG_API_ID, TG_API_HASH и TG_PHONE.")
 
     session_path = settings.db_path.parent / "telegram_user"
     client = TelegramClient(str(session_path), settings.tg_api_id, settings.tg_api_hash)

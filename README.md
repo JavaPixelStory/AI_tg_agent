@@ -1,50 +1,85 @@
-# News concierge for Telegram
+# Персональный новостной помощник для Telegram
 
-This service collects public news from RSS feeds, selected web pages and public Telegram channels, then sends new items as compact cards to your private Telegram chat:
+Сервис собирает новости из RSS-лент, выбранных веб-страниц и публичных Telegram-каналов, а затем отправляет новые материалы в вашу личную переписку с ботом в виде компактных карточек:
 
-> image · title · short description · source link
+> картинка · заголовок · краткое описание · ссылка на источник
 
-It is deliberately an allow-list system: it reads only sources that you configure. It does not scrape private chats, read incoming private messages, or upload collected content to another service.
+Система работает по белому списку: она читает только источники, которые вы сами настроили. Она не сканирует приватные чаты, не читает входящие личные сообщения и не передаёт собранные данные сторонним сервисам.
 
-## What you need
+## Что потребуется
 
-- Python 3.11+
-- A Telegram bot token from [@BotFather](https://t.me/BotFather)
-- For channel monitoring: a Telegram API ID/hash from [my.telegram.org/apps](https://my.telegram.org/apps). Telethon uses your own Telegram account, because ordinary bots cannot subscribe to and read arbitrary channels.
+- Python 3.11 или новее;
+- токен Telegram-бота от [@BotFather](https://t.me/BotFather);
+- для наблюдения за каналами: Telegram API ID и API hash с [my.telegram.org/apps](https://my.telegram.org/apps). Они нужны Telethon для работы через ваш Telegram-аккаунт: обычный бот не может сам подписываться и читать произвольные каналы.
 
-Only monitor sources you may access and where monitoring complies with the source's terms and applicable law.
+Отслеживайте только те источники, к которым у вас есть доступ, и соблюдайте правила площадок и применимое законодательство.
 
-## Setup
+## Установка
+
+В PowerShell, из папки проекта:
 
 ```powershell
-py -m venv .venv
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
 Copy-Item sources.example.yaml sources.yaml
 ```
 
-1. Fill in `BOT_TOKEN` in `.env`.
-2. Start a chat with your bot and run `python -m app` once.
-3. Send `/whoami` to it; copy the displayed ID into `OWNER_CHAT_ID`.
-4. Add RSS/web sources to `sources.yaml` and public channel handles to `TELEGRAM_CHANNELS`.
-5. Start it again: `python -m app`.
+Если команда `python` недоступна, установите Python через Python Install Manager:
 
-On the first run with Telegram channels, Telethon asks for the code sent by Telegram (and your two-factor password when enabled). Its local session is stored under `data/` and is excluded from Git.
+```powershell
+winget install 9NQ7512CXL7T -e --accept-package-agreements --disable-interactivity
+```
 
-## Commands
+После установки откройте новое окно PowerShell и выполните `py install 3.13`.
 
-- `/whoami` — show your numeric ID (before owner configuration)
-- `/status` — source and delivery status (owner only)
-- `/digest` — collect and send available web/RSS items now (owner only)
+## Настройка
 
-## Privacy and Git safety
+1. Впишите токен от @BotFather в `BOT_TOKEN` файла `.env`.
+2. Запустите бота один раз: `python -m app`.
+3. Отправьте боту команду `/whoami`. Скопируйте полученный идентификатор в `OWNER_CHAT_ID` файла `.env`.
+4. Добавьте RSS-ленты и веб-источники в `sources.yaml`, а имена публичных каналов — через запятую в `TELEGRAM_CHANNELS` файла `.env`.
+5. Перезапустите сервис: `python -m app`.
 
-- `.env`, Telegram sessions, database, logs and virtual environments are ignored by Git.
-- Do not paste tokens, API hashes, phone numbers or chat IDs into source code, commits or issue trackers.
-- Before sharing history, run `git status --ignored` and inspect the staged diff with `git diff --cached`.
-- If a bot token leaks, revoke it in @BotFather and issue a new one. If Telegram API credentials leak, revoke/regenerate them in Telegram's developer portal.
+При первом запуске отслеживания Telegram-каналов Telethon запросит код, который Telegram отправит вам, а также пароль двухфакторной аутентификации, если он включён. Локальная сессия хранится в `data/` и исключена из Git.
 
-## Run continuously
+## Команды бота
 
-For initial testing, leave the terminal open. For production, run it under a process manager (Windows Task Scheduler, NSSM, Docker, or systemd) with the working directory set to this project directory. Back up `data/news.sqlite3` only if you want to preserve the delivered-item history; it contains URLs and titles.
+- `/whoami` — показать ваш числовой Telegram ID; работает до настройки владельца;
+- `/status` — показать количество источников и состояние доставки; доступно только владельцу;
+- `/digest` — немедленно собрать и отправить доступные новости из RSS и сайтов; доступно только владельцу.
+
+## Формат `sources.yaml`
+
+Используйте [sources.example.yaml](sources.example.yaml) как основу. У RSS-источника достаточно указать имя и URL. Для HTML-страниц задаются CSS-селекторы для контейнера материала, заголовка, ссылки, описания и изображения.
+
+```yaml
+rss:
+  - name: Название источника
+    url: https://example.org/feed.xml
+    limit: 5
+
+web:
+  - name: Новостной сайт
+    url: https://example.org/news
+    item_selector: article
+    title_selector: h2, h3
+    link_selector: a
+    description_selector: p
+    image_selector: img
+    limit: 5
+```
+
+## Конфиденциальность и безопасность Git
+
+- `.env`, сессии Telegram, база данных, журналы, виртуальные окружения и ваш `sources.yaml` исключены из Git;
+- не вставляйте токены, API hash, номер телефона или ID чата в исходный код, коммиты и тикеты;
+- перед отправкой изменений проверяйте `git status --ignored` и индекс через `git diff --cached`;
+- если токен бота раскрыт, отзовите его через @BotFather и создайте новый; если раскрыты Telegram API credentials, отзовите или пересоздайте их в кабинете разработчика Telegram.
+
+## Непрерывная работа
+
+Для первой проверки достаточно оставить терминал открытым. Для постоянной работы запустите сервис через планировщик задач Windows, NSSM, Docker или systemd; рабочей директорией должна быть эта папка проекта.
+
+База `data/news.sqlite3` хранит историю уже доставленных новостей (ссылки и заголовки), чтобы не присылать дубликаты. Создавайте её резервную копию, только если хотите сохранить эту историю.

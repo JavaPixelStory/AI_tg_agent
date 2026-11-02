@@ -1,4 +1,4 @@
-# Secrets and Telegram user sessions
+# Секреты и пользовательские сессии Telegram
 .env
 .env.*
 !.env.example
@@ -6,14 +6,14 @@ sources.yaml
 *.session
 *.session-journal
 
-# Runtime state and logs
+# Рабочее состояние и журналы
 data/
 logs/
 *.sqlite3
 *.db
 *.log
 
-# Python
+# Кэш и окружения Python
 __pycache__/
 *.py[cod]
 .venv/
@@ -21,7 +21,7 @@ venv/
 .pytest_cache/
 .mypy_cache/
 
-# Editor / OS
+# Редактор и ОС
 .vscode/
 .idea/
 Thumbs.db

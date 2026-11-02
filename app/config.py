@@ -32,7 +32,7 @@ class Settings:
         load_dotenv(ROOT / ".env")
         token = os.getenv("BOT_TOKEN", "").strip()
         if not token or token == "replace_me":
-            raise RuntimeError("Set BOT_TOKEN in .env (copy it from .env.example first).")
+            raise RuntimeError("Укажите BOT_TOKEN в .env (сначала скопируйте .env.example).")
         owner = os.getenv("OWNER_CHAT_ID", "").strip()
         api_id = os.getenv("TG_API_ID", "").strip()
         return cls(

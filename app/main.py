@@ -30,7 +30,7 @@ def load_sources(path: Path) -> dict:
 
 
 def caption(item: NewsItem) -> str:
-    # Photo captions are limited to 1024 Telegram characters; leave room for markup/link.
+    # Подпись к фото ограничена 1024 символами Telegram; оставляем место для разметки и ссылки.
     body = html.escape(item.description[:250])
     return f"<b>{html.escape(item.title[:500])}</b>\n\n{body}\n\n<a href=\"{html.escape(item.url, quote=True)}\">Источник: {html.escape(item.source)}</a>"
 
@@ -52,7 +52,7 @@ class NewsService:
             self.store.mark_delivered(item.key)
             return True
         except Exception:
-            log.exception("Could not deliver item from %s", item.source)
+            log.exception("Не удалось доставить материал из источника %s", item.source)
             return False
 
     async def collect_web_once(self) -> int:
@@ -65,12 +65,12 @@ class NewsService:
                 try:
                     for item in await collect_rss(session, config):
                         if sent < self.settings.max_items_per_cycle and await self.deliver(item): sent += 1
-                except Exception: log.exception("RSS collection failed: %s", config.get("name"))
+                except Exception: log.exception("Не удалось собрать RSS: %s", config.get("name"))
             for config in sources.get("web", []):
                 try:
                     for item in await collect_web(session, config):
                         if sent < self.settings.max_items_per_cycle and await self.deliver(item): sent += 1
-                except Exception: log.exception("Web collection failed: %s", config.get("name"))
+                except Exception: log.exception("Не удалось собрать материалы сайта: %s", config.get("name"))
         return sent
 
     async def poll_web(self) -> None:
@@ -92,7 +92,7 @@ async def run() -> None:
     async def status(message: Message) -> None:
         if message.chat.id != settings.owner_chat_id: return
         src = load_sources(settings.sources_path)
-        await message.answer(f"RSS: {len(src.get('rss', []))}; web: {len(src.get('web', []))}; Telegram channels: {len(settings.telegram_channels)}")
+        await message.answer(f"RSS: {len(src.get('rss', []))}; сайты: {len(src.get('web', []))}; Telegram-каналы: {len(settings.telegram_channels)}")
 
     @dp.message(Command("digest"))
     async def digest(message: Message) -> None:
@@ -101,7 +101,7 @@ async def run() -> None:
         await message.answer(f"Готово. Отправлено: {sent}.")
 
     if not settings.owner_chat_id:
-        log.warning("OWNER_CHAT_ID is unset. Use /whoami, then set it in .env and restart.")
+        log.warning("Не задан OWNER_CHAT_ID. Выполните /whoami, укажите ID в .env и перезапустите сервис.")
     asyncio.create_task(service.poll_web())
     if settings.telegram_channels:
         asyncio.create_task(watch_channels(settings, service.deliver))

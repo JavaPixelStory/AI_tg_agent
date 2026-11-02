@@ -1,11 +1,11 @@
-# Copy to sources.yaml and customize it. The real sources.yaml is safe to commit
-# only if it contains public URLs; keep personal or paid URLs in a separate local file.
+# Скопируйте файл в sources.yaml и настройте его. Настоящий sources.yaml допустимо
+# коммитить только с публичными URL; личные или платные URL храните в локальном файле.
 rss:
   - name: OpenAI News
     url: https://openai.com/news/rss.xml
     limit: 5
 
-# HTML pages require CSS selectors. First matching article/item is used.
+# Для HTML-страниц нужны CSS-селекторы. Используется первый подходящий материал.
 web:
   - name: Example site
     url: https://example.com/news
